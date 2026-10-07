@@ -1867,5 +1867,264 @@ cart.addEventListener("click", () => {
 
 });
 
+document.addEventListener("DOMContentLoaded", () => {
+    const searchInput = document.querySelector('.search-area input');
+    const categorySelect = document.querySelectorAll('.search-area select')[0];
+    const priceSelect = document.querySelectorAll('.search-area select')[1];
+    const sortSelect = document.querySelectorAll('.search-area select')[2];
+    const filterButton = document.querySelector('.search-area button');
+
+    const comboContainer = document.querySelector('.combo-container');
+    const combos = [...document.querySelectorAll('.combo-card')];
+
+    // -----------------------------
+    // Add useful options dynamically
+    // -----------------------------
+
+    categorySelect.innerHTML = `
+        <option value="all">All Categories</option>
+        <option value="burger">Burger</option>
+        <option value="pizza">Pizza</option>
+        <option value="chicken">Chicken</option>
+        <option value="drinks">Drinks</option>
+    `;
+
+    priceSelect.innerHTML = `
+        <option value="all">All Prices</option>
+        <option value="under300">Under ₹300</option>
+        <option value="300-500">₹300 - ₹500</option>
+        <option value="above500">Above ₹500</option>
+    `;
+
+    sortSelect.innerHTML = `
+        <option value="default">Sort By</option>
+        <option value="low">Price: Low to High</option>
+        <option value="high">Price: High to Low</option>
+        <option value="az">Name: A to Z</option>
+        <option value="za">Name: Z to A</option>
+    `;
+
+
+    // -----------------------------
+    // Main filtering function
+    // -----------------------------
+
+    function filterCombos() {
+
+        const searchValue = searchInput.value.toLowerCase().trim();
+        const categoryValue = categorySelect.value;
+        const priceValue = priceSelect.value;
+
+        let visibleCombos = [];
+
+        combos.forEach(combo => {
+
+            const name = combo.querySelector('.combo-name')
+                ?.textContent.toLowerCase() || "";
+
+            const category = combo.dataset.category?.toLowerCase() || "";
+
+            const price = parseFloat(combo.dataset.price) || 0;
+
+            // Search check
+            const matchesSearch =
+                name.includes(searchValue);
+
+            // Category check
+            const matchesCategory =
+                categoryValue === "all" ||
+                category === categoryValue;
+
+            // Price check
+            let matchesPrice = true;
+
+            if (priceValue === "under300") {
+                matchesPrice = price < 300;
+            }
+
+            if (priceValue === "300-500") {
+                matchesPrice = price >= 300 && price <= 500;
+            }
+
+            if (priceValue === "above500") {
+                matchesPrice = price > 500;
+            }
+
+            // Final result
+            const show =
+                matchesSearch &&
+                matchesCategory &&
+                matchesPrice;
+
+            if (show) {
+                combo.style.display = "";
+                combo.classList.add("show-combo");
+                visibleCombos.push(combo);
+            } else {
+                combo.style.display = "none";
+                combo.classList.remove("show-combo");
+            }
+        });
+
+        sortCombos(visibleCombos);
+
+        showResultMessage(visibleCombos.length);
+    }
+
+
+    // -----------------------------
+    // Sorting
+    // -----------------------------
+
+    function sortCombos(items) {
+
+        const sortValue = sortSelect.value;
+
+        if (!comboContainer || sortValue === "default") return;
+
+        items.sort((a, b) => {
+
+            const priceA = parseFloat(a.dataset.price) || 0;
+            const priceB = parseFloat(b.dataset.price) || 0;
+
+            const nameA =
+                a.querySelector('.combo-name')?.textContent
+                .trim().toLowerCase() || "";
+
+            const nameB =
+                b.querySelector('.combo-name')?.textContent
+                .trim().toLowerCase() || "";
+
+            if (sortValue === "low") {
+                return priceA - priceB;
+            }
+
+            if (sortValue === "high") {
+                return priceB - priceA;
+            }
+
+            if (sortValue === "az") {
+                return nameA.localeCompare(nameB);
+            }
+
+            if (sortValue === "za") {
+                return nameB.localeCompare(nameA);
+            }
+
+        });
+
+        items.forEach(combo => {
+            comboContainer.appendChild(combo);
+        });
+    }
+
+
+    // -----------------------------
+    // Result counter
+    // -----------------------------
+
+    function showResultMessage(count) {
+
+        let resultMessage =
+            document.querySelector(".search-result-message");
+
+        if (!resultMessage) {
+
+            resultMessage = document.createElement("p");
+
+            resultMessage.className =
+                "search-result-message";
+
+            document.querySelector(".search-area")
+                .after(resultMessage);
+        }
+
+        if (count === 0) {
+
+            resultMessage.innerHTML =
+                "   Thankyou for choosing your combopack";
+
+            resultMessage.style.color = "#e74c3c";
+
+        } else {
+
+            resultMessage.innerHTML =
+                `🍔 ${count} combo${count > 1 ? "s" : ""} found`;
+
+            resultMessage.style.color = "#555";
+        }
+    }
+
+
+    // -----------------------------
+    // Live search
+    // -----------------------------
+
+    searchInput.addEventListener("input", filterCombos);
+
+    categorySelect.addEventListener("change", filterCombos);
+
+    priceSelect.addEventListener("change", filterCombos);
+
+    sortSelect.addEventListener("change", filterCombos);
+
+
+    // -----------------------------
+    // Interesting Filter button
+    // -----------------------------
+
+    filterButton.addEventListener("click", () => {
+
+        document.querySelector(".search-area")
+            .classList.toggle("filter-active");
+
+        filterButton.classList.toggle("active");
+
+        if (filterButton.classList.contains("active")) {
+
+            filterButton.innerHTML = `
+                <i class="fa-solid fa-xmark"></i>
+                Close
+            `;
+
+        } else {
+
+            filterButton.innerHTML = `
+                <i class="fa-solid fa-filter"></i>
+                Filter
+            `;
+        }
+    });
+
+
+    // -----------------------------
+    // Enter key = search
+    // -----------------------------
+
+    searchInput.addEventListener("keydown", (event) => {
+
+        if (event.key === "Enter") {
+
+            filterCombos();
+
+            searchInput.blur();
+
+            // Small animation
+            searchInput.classList.add("searched");
+
+            setTimeout(() => {
+                searchInput.classList.remove("searched");
+            }, 500);
+        }
+    });
+
+
+    // -----------------------------
+    // Initial state
+    // -----------------------------
+
+    showResultMessage(combos.length);
+
+});
 </script>
 </html>
