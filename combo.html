@@ -1729,5 +1729,143 @@ function removeFromCart() {
 cart.addEventListener("click", () => {
     console.log(`Cart contains ${cartCount} item(s)`);
 });
+    document.addEventListener("DOMContentLoaded", function () {
+
+    // ==========================
+    // ADD TO CART
+    // ==========================
+
+    let cart = 0;
+
+    const cartText = document.querySelector(".cartname p");
+
+    document.querySelectorAll(".content a").forEach(function (button) {
+
+        button.addEventListener("click", function (e) {
+
+            e.preventDefault();
+
+            cart++;
+
+            if (cartText) {
+                cartText.textContent = cart + " items";
+            }
+
+            const card = button.closest(".card");
+
+            if (card) {
+
+                const name = card.querySelector("h3");
+
+                if (name) {
+                    alert(name.textContent + " added to cart!");
+                }
+
+            }
+
+        });
+
+    });
+
+
+    // ==========================
+    // NEWSLETTER
+    // ==========================
+
+    const subscribe =
+        document.querySelector(".newsletter-right button");
+
+    const email =
+        document.querySelector(".newsletter-right input");
+
+    if (subscribe && email) {
+
+        subscribe.addEventListener("click", function () {
+
+            if (email.value.trim() === "") {
+
+                alert("Please enter your email.");
+
+                return;
+            }
+
+            alert("Thank you for subscribing!");
+
+            email.value = "";
+
+        });
+
+    }
+
+
+    // ==========================
+    // CATEGORY
+    // ==========================
+
+    document.querySelectorAll(".categories .item")
+        .forEach(function (item) {
+
+            item.addEventListener("click", function () {
+
+                document
+                    .querySelectorAll(".categories .item")
+                    .forEach(function (i) {
+                        i.classList.remove("active");
+                    });
+
+                item.classList.add("active");
+
+                alert(
+                    "Category: " +
+                    item.textContent.trim()
+                );
+
+            });
+
+        });
+
+
+    // ==========================
+    // ORDER NOW
+    // ==========================
+
+    document
+        .querySelectorAll(".combo-info a, .offer-content a, .btn1")
+        .forEach(function (button) {
+
+            button.addEventListener("click", function (e) {
+
+                e.preventDefault();
+
+                alert(
+                    "Thank you! Your order request has been received."
+                );
+
+            });
+
+        });
+
+
+    // ==========================
+    // FOOTER YEAR
+    // ==========================
+
+    const footer =
+        document.querySelector(".footer-bottom p");
+
+    if (footer) {
+
+        footer.textContent =
+            "© " +
+            new Date().getFullYear() +
+            " FoodRange. All Rights Reserved.";
+
+    }
+
+
+    console.log("FOODRANGE loaded successfully!");
+
+});
+
 </script>
 </html>
